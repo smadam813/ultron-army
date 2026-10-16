@@ -85,7 +85,7 @@ Pick the pattern that fits the candidate. Mix them. Don't make every diagram loo
 
 ### Inline SVG graph (the workhorse for dependencies / call flow)
 
-Use an inline `<svg>` when the point is "X calls Y calls Z, and look at the mess." Modules are `<rect>` + `<text>`, calls are `<line>` or `<path>` with a shared `<marker>` arrowhead. Put it inside a `.diagram` container so it doesn't feel parachuted in. Colour leakage edges with `.leak`, dash seams with `.seam`, and fill the deep module dark. Lay nodes out by hand on a simple grid: left-to-right for call flow, top-to-bottom for layers. For sequences ("before: 6 round-trips; after: 1"), draw vertical lifelines and horizontal message arrows.
+Use an inline `<svg>` when the point is "X calls Y calls Z, and look at the mess." Modules are `<rect>` + `<text>`, calls are `<line>` or `<path>` with a shared `<marker>` arrowhead. Put it inside a `.diagram` container so it doesn't feel parachuted in. Colour leakage edges with `.leak`, dash seams with `.seam`, and fill the deep module dark. Lay nodes out by hand on a simple grid: left-to-right for call flow, top-to-bottom for layers. For sequences ("before: 6 round-trips; after: 1"), draw vertical lifelines and horizontal message arrows. Define the `<marker>`s once per page, in the first diagram's `<defs>` as below; later diagrams reuse `url(#arrow)` and `url(#arrow-leak)` without redefining them, since element IDs must be unique in the document.
 
 ```html
 <div class="diagram">

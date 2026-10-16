@@ -16,7 +16,7 @@ The issue tracker and triage label vocabulary should have been provided to you. 
 
 Check with the user that these seams match their expectations.
 
-3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
+3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage. If the spec is later split with `/to-tickets`, that skill removes the label, since the tickets then carry the work.
 
 <spec-template>
 
@@ -61,6 +61,7 @@ Exception: if a prototype produced a snippet that encodes a decision more precis
 A list of testing decisions that were made. Include:
 
 - A description of what makes a good test (only test external behavior, not implementation details)
+- The seams under test, as agreed with the user in step 2 (implementers treat these as the pre-agreed seams for `/tdd`)
 - Which modules will be tested
 - Prior art for the tests (i.e. similar types of tests in the codebase)
 

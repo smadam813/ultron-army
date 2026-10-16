@@ -19,14 +19,22 @@ else
   BOLD=""; DIM=""; RESET=""; BLUE=""; GREEN=""; YELLOW=""
 fi
 
-# Author sets this at the top of the stages section.
-TOTAL_STAGES=0
+# Counted from the stage calls in this file, so progress stays right as stages
+# are added or removed.
+TOTAL_STAGES=$(grep -cE "^[[:space:]]*stage[[:space:]]+[\"']" "$0" 2>/dev/null || true)
+[[ -n "$TOTAL_STAGES" ]] || TOTAL_STAGES="?"
 
 _STAGE_INDEX=0
 ENV_FILE="${ENV_FILE:-.env}"
 WRITTEN_ENV=()    # KEYs written to ENV_FILE this run
 WRITTEN_SECRET=() # secret NAMEs set this run
+WRITTEN_VAR=()    # variable NAMEs set this run
 SKIPPED=()        # things we couldn't do (e.g. gh missing)
+
+# Lines still queued this soon after an answer are the rest of a paste.
+# bash 3.2 (macOS) only takes whole-second timeouts.
+_PASTE_WAIT=0.1
+(( BASH_VERSINFO[0] >= 4 )) || _PASTE_WAIT=1
 
 # _clear wipes the terminal so only the current step is on screen. No-op when
 # output isn't a terminal, so piped logs stay readable.
@@ -68,7 +76,7 @@ open_url() {
   local url="$1"
   printf '  %s↗ opening%s %s\n' "$GREEN" "$RESET" "$url"
   { if   command -v wslview     >/dev/null 2>&1; then wslview "$url"
-    elif command -v explorer.exe >/dev/null 2>&1; then explorer.exe "$url"
+    elif command -v explorer.exe >/dev/null 2>&1; then explorer.exe "$url" || true  # exits 1 even on success
     elif command -v xdg-open    >/dev/null 2>&1; then xdg-open "$url"
     elif command -v open        >/dev/null 2>&1; then open "$url"
     else false; fi
@@ -84,7 +92,7 @@ pause() {
 # confirm "question" is a y/N gate; returns success on yes.
 confirm() {
   local reply=""
-  printf '  %s? %s [y/N] ' "$YELLOW" "$1"
+  printf '  %s? %s [y/N]%s ' "$YELLOW" "$1" "$RESET"
   read -r reply || true
   [[ "$reply" =~ ^[Yy] ]]
 }
@@ -94,7 +102,7 @@ confirm() {
 _existing() {
   [[ -f "$ENV_FILE" ]] || return 1
   local line value sq="'\\''"; line=$(grep -E "^${1}=" "$ENV_FILE" | tail -n1) || return 1
-  value="${line#*=}"
+  value="${line#*=}"; value="${value%$'\r'}"   # tolerate a CRLF .env
   if [[ "$value" == \'*\' ]]; then value="${value:1:${#value}-2}"; value="${value//"$sq"/\'}"
   elif [[ "$value" == \"*\" ]]; then
     value="${value:1:${#value}-2}"
@@ -103,16 +111,38 @@ _existing() {
   printf '%s' "$value"
 }
 
+# _drain discards input still queued after an answer (the tail of a multi-line
+# paste) so it can't answer the next prompt. Succeeds if it dropped anything.
+# -n reads the terminal raw, so a last line with no newline goes too.
+_drain() {
+  local junk="" dropped=1
+  while IFS= read -r -s -n 4096 -t "$_PASTE_WAIT" junk; do dropped=0; junk=""; done
+  [[ -z "$junk" ]] || dropped=0   # a timed-out read keeps the partial line
+  return "$dropped"
+}
+
+# _single_line VALUE succeeds for a one-line answer. On a multi-line paste it
+# warns and fails, so the prompt asks again instead of saving a broken value.
+_single_line() {
+  if ! _drain && [[ "$1" != *$'\n'* ]]; then return 0; fi
+  warn "that paste was more than one line, and this prompt takes one; nothing was saved, so try again"
+  return 1
+}
+
 # ask KEY "Prompt" reads a value into $KEY. Offers the existing .env value as
 # a default on re-runs (Enter keeps it). Visible input (non-secret), edited
-# with Readline. Fails at EOF with no input.
+# with Readline. Single-line only. Fails at EOF with no input.
 ask() {
-  local key="$1" prompt="$2" current input s=$'\001' e=$'\002' p rc=0
+  local key="$1" prompt="$2" current input s=$'\001' e=$'\002' p rc
   current=$(_existing "$key" || true)
   # Readline needs the colour codes wrapped in \001..\002 to place the cursor.
   p="  $s$BOLD$e$prompt$s$RESET$e "
   [[ -n "$current" ]] && p+="$s$DIM$e[Enter keeps current]$s$RESET$e "
-  read -e -r -p "$p" input || rc=1
+  while :; do
+    rc=0; input=""
+    read -e -r -p "$p" input || rc=1
+    _single_line "$input" && break
+  done
   if (( rc )) && [[ -z "$input" ]]; then return 1; fi
   [[ -z "$input" && -n "$current" ]] && input="$current"
   printf -v "$key" '%s' "$input"
@@ -120,15 +150,19 @@ ask() {
 
 # ask_secret KEY "Prompt" is like ask, but input is hidden.
 ask_secret() {
-  local key="$1" prompt="$2" current input rc=0
+  local key="$1" prompt="$2" current input rc
   current=$(_existing "$key" || true)
-  if [[ -n "$current" ]]; then
-    printf '  %s%s%s %s[Enter keeps current]%s ' "$BOLD" "$prompt" "$RESET" "$DIM" "$RESET"
-  else
-    printf '  %s%s%s ' "$BOLD" "$prompt" "$RESET"
-  fi
-  read -rs input || rc=1
-  printf '\n'
+  while :; do
+    if [[ -n "$current" ]]; then
+      printf '  %s%s%s %s[Enter keeps current]%s ' "$BOLD" "$prompt" "$RESET" "$DIM" "$RESET"
+    else
+      printf '  %s%s%s ' "$BOLD" "$prompt" "$RESET"
+    fi
+    rc=0; input=""
+    read -rs input || rc=1
+    printf '\n'
+    _single_line "$input" && break
+  done
   if (( rc )) && [[ -z "$input" ]]; then return 1; fi
   [[ -z "$input" && -n "$current" ]] && input="$current"
   printf -v "$key" '%s' "$input"
@@ -170,6 +204,7 @@ set_var() {
   local name="$1" value="$2"
   if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
     if gh variable set "$name" --body "$value" >/dev/null 2>&1; then
+      WRITTEN_VAR+=("$name")
       printf '  %s✓ set%s GitHub variable %s\n' "$GREEN" "$RESET" "$name"
       return
     fi
@@ -184,6 +219,7 @@ finish() {
   printf '\n%s%s  ✓ Setup complete%s\n' "$BOLD" "$GREEN" "$RESET"
   (( ${#WRITTEN_ENV[@]} ))    && note "wrote ${#WRITTEN_ENV[@]} value(s) to $ENV_FILE: ${WRITTEN_ENV[*]}"
   (( ${#WRITTEN_SECRET[@]} )) && note "set ${#WRITTEN_SECRET[@]} GitHub secret(s): ${WRITTEN_SECRET[*]}"
+  (( ${#WRITTEN_VAR[@]} ))    && note "set ${#WRITTEN_VAR[@]} GitHub variable(s): ${WRITTEN_VAR[*]}"
   if (( ${#SKIPPED[@]} )); then
     printf '\n'; warn "still to do by hand:"
     for s in "${SKIPPED[@]}"; do note "  - $s"; done
@@ -193,14 +229,12 @@ finish() {
 
 # ──────────────────────────────────────────────────────────────────────────
 # STAGES: author this section. One stage() per step the human takes.
-# Replace the example below. Set TOTAL_STAGES to match the stages you write.
+# Replace the example below. The stage count is computed, so don't set it.
 # Keep every stage inside run_wizard and the last line as is: bash then parses
 # the whole file before the first prompt, so an edit mid-run can't break it.
 # ──────────────────────────────────────────────────────────────────────────
 
 run_wizard() {
-
-TOTAL_STAGES=1
 
 banner "Stripe setup"
 
