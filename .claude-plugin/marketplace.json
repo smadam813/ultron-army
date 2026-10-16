@@ -1,0 +1,15 @@
+{
+  "name": "ultron-army",
+  "description": "Tools for any person performing the duties of a Principal / Staff engineer",
+  "owner": {
+    "name": "Adam Keech"
+  },
+  "plugins": [
+    {
+      "name": "builder-skills",
+      "description": "Skills for building software well: engineering practices for Principal / Staff engineers",
+      "version": "0.1.0",
+      "source": "./plugins/builder-skills"
+    }
+  ]
+}
