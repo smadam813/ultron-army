@@ -53,6 +53,8 @@ Modifications:
 - `improve-codebase-architecture`'s HTML report no longer loads Tailwind or Mermaid from CDNs; it uses
   inline CSS and inline SVG and renders offline.
 - Dropped the Codex-specific `agents/openai.yaml` files and the category READMEs (replaced by this plugin's `README.md`).
+- Pointed steering-file references at `CLAUDE.md` instead of `AGENTS.md`, since Claude Code loads `CLAUDE.md`.
+- Specs carry a `spec` label instead of the `ready-for-agent` triage label.
 
 `skills/pr` also reproduces content from Dex Horthy's `show-me` skill (HumanLayer); see `skills/pr/CREDITS.md`.
 

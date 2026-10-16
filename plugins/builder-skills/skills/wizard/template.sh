@@ -31,6 +31,12 @@ WRITTEN_SECRET=() # secret NAMEs set this run
 WRITTEN_VAR=()    # variable NAMEs set this run
 SKIPPED=()        # things we couldn't do (e.g. gh missing)
 
+# write_env's temp copy of ENV_FILE holds every secret in it: never leave it
+# behind, even on Ctrl-C.
+_TMP=""
+trap '[[ -z "$_TMP" ]] || rm -f "$_TMP"' EXIT
+trap 'exit 130' INT
+
 # Lines still queued this soon after an answer are the rest of a paste.
 # bash 3.2 (macOS) only takes whole-second timeouts.
 _PASTE_WAIT=0.1
@@ -98,15 +104,18 @@ confirm() {
 }
 
 # _existing KEY: current value of KEY in ENV_FILE, if any, with write_env's single
-# quotes or a plain dotenv double-quoted value undone.
+# quotes or a plain dotenv double-quoted value undone. Reads `export KEY=` lines
+# too, and drops an inline ` # comment` from an unquoted value.
 _existing() {
   [[ -f "$ENV_FILE" ]] || return 1
-  local line value sq="'\\''"; line=$(grep -E "^${1}=" "$ENV_FILE" | tail -n1) || return 1
+  local line value sq="'\\''"; line=$(grep -E "^(export[[:space:]]+)?${1}=" "$ENV_FILE" | tail -n1) || return 1
   value="${line#*=}"; value="${value%$'\r'}"   # tolerate a CRLF .env
   if [[ "$value" == \'*\' ]]; then value="${value:1:${#value}-2}"; value="${value//"$sq"/\'}"
   elif [[ "$value" == \"*\" ]]; then
     value="${value:1:${#value}-2}"
     [[ "$value" == *[\\\$\"]* ]] && return 1   # escapes, $ or ": can't decode safely; ask again
+  else
+    value="${value%%[[:space:]]#*}"
   fi
   printf '%s' "$value"
 }
@@ -132,6 +141,8 @@ _single_line() {
 # ask KEY "Prompt" reads a value into $KEY. Offers the existing .env value as
 # a default on re-runs (Enter keeps it). Visible input (non-secret), edited
 # with Readline. Single-line only. Fails at EOF with no input.
+# Every KEY/NAME is an UPPER_CASE env name: the helpers' locals are lower-case,
+# and a KEY matching one would be swallowed by it.
 ask() {
   local key="$1" prompt="$2" current input s=$'\001' e=$'\002' p rc
   current=$(_existing "$key" || true)
@@ -169,16 +180,17 @@ ask_secret() {
 }
 
 # write_env KEY VALUE upserts KEY='VALUE' into ENV_FILE (replaces any existing
-# line) and sets $KEY. Idempotent. Creates ENV_FILE at mode 0600; writes through
-# a symlink and keeps an existing file's mode.
+# line, `export KEY=` included) and sets $KEY. Idempotent. Creates ENV_FILE at
+# mode 0600; writes through a symlink and keeps an existing file's mode, which
+# is why it copies back with cat rather than mv-ing a new file into place.
 write_env() {
-  local key="$1" value="$2" tmp sq="'\\''"
+  local key="$1" value="$2" sq="'\\''"
   [[ -e "$ENV_FILE" ]] || (umask 077 && : > "$ENV_FILE")
-  tmp=$(mktemp)
-  grep -vE "^${key}=" "$ENV_FILE" > "$tmp" || true
-  printf "%s='%s'\n" "$key" "${value//\'/$sq}" >> "$tmp"
-  cat "$tmp" > "$ENV_FILE"
-  rm -f "$tmp"
+  _TMP=$(mktemp)   # removed by the EXIT trap if the run is interrupted
+  grep -vE "^(export[[:space:]]+)?${key}=" "$ENV_FILE" > "$_TMP" || true
+  printf "%s='%s'\n" "$key" "${value//\'/$sq}" >> "$_TMP"
+  cat "$_TMP" > "$ENV_FILE"
+  rm -f "$_TMP"; _TMP=""
   printf -v "$key" '%s' "$value"
   WRITTEN_ENV+=("$key")
   printf '  %s✓ wrote%s %s → %s\n' "$GREEN" "$RESET" "$key" "$ENV_FILE"

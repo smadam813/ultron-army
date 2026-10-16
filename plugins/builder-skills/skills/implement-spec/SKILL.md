@@ -29,7 +29,7 @@ Communication to and from subagents should be sparse. Communicate primarily thro
    - calls the Skill tool with `tdd` to build the ticket, treating the seams in the spec's Testing Decisions as the pre-agreed seams (it runs in the background and can't ask the user); if the ticket needs a seam the spec doesn't name, it stops and reports that instead of inventing one;
    - merges the integration branch tip into its own branch before reporting done
 
-5. Once an **implementer subagent** completes, merge its work to the integration branch with a **merger subagent**.
+5. Once an **implementer subagent** completes, merge its work to the integration branch with a **merger subagent**. Run one merger at a time, in its own worktree on the integration branch: when several implementers finish together, queue their merges, so no two mergers write to the integration branch at once and no implementer pulls a half-done merge.
 
 6. If this changes the **frontier** of available tickets, kick off more **implementer subagents** to work on the new tickets. This allows for maximum concurrency.
 

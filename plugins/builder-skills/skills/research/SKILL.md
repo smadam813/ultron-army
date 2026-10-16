@@ -3,7 +3,7 @@ name: research
 description: Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent.
 ---
 
-Spin up a **background agent** to do the research, so you keep working while it reads.
+Spin up a **background agent** to do the research, so you keep working while it reads. If you are already a subagent (a wayfinder research ticket, say), you can't start another agent: do the job below yourself.
 
 Its job:
 

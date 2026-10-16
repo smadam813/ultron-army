@@ -61,7 +61,7 @@ Query the issue tracker and present three buckets, oldest first:
 2. **`needs-triage`**: evaluation in progress.
 3. **`needs-info` with reporter activity since the last triage notes**: needs re-evaluation.
 
-Leave out issues labelled `spec` or `wayfinder:*` (on a local tracker, `spec.md` files and wayfinder maps and tickets). Other skills create those; they're never triage work, even with no triage label.
+Leave out issues labelled `spec` or `wayfinder:*`. On a local tracker, leave out `spec.md` files, `map.md` files, and any ticket with a `Type:` line (only wayfinder tickets carry one). Other skills create those; they're never triage work, even with no triage label.
 
 When PRs are in scope, include external PRs in these buckets and tag each line `[PR]` or `[issue]`. Discovery surfaces only *external* PRs (the tracker config defines who counts as external), so a collaborator's in-flight PR is not triage work. This filter is discovery-only; an explicitly named PR is always triaged regardless of author.
 
