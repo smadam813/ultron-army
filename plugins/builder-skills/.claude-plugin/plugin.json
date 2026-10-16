@@ -1,7 +1,7 @@
 {
   "name": "builder-skills",
   "description": "Skills for building software well: engineering practices for Principal / Staff engineers",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "Adam Keech"
   },
