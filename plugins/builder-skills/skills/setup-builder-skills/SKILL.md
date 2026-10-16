@@ -98,7 +98,7 @@ The block:
 
 Include the `### Triage labels` sub-block, and write `docs/agents/triage-labels.md`, only when `triage` is installed and Section B ran. When it isn't, both are omitted.
 
-On GitHub or GitLab, create the `spec` label if the tracker lacks it (`gh label create` / `glab label create`): `/to-spec` applies it whether or not `triage` is installed. When Section B ran, likewise create each configured triage label the tracker lacks.
+On GitHub or GitLab, create these labels if the tracker lacks them (`gh label create` / `glab label create`), since creating an issue with a missing label fails: `spec` (applied by `/to-spec`), and `wayfinder:map`, `wayfinder:research`, `wayfinder:prototype`, `wayfinder:grilling`, `wayfinder:task` (applied by `/wayfinder`). These are needed whether or not `triage` is installed. When Section B ran, likewise create each configured triage label the tracker lacks.
 
 Then write the docs files using the seed templates in this skill folder as a starting point:
 
