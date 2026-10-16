@@ -53,7 +53,7 @@ Not sure where to start? Run **[`/ask-builder`](skills/ask-builder/SKILL.md)**: 
 ### Model-invoked
 
 - **[grilling](skills/grilling/SKILL.md)**: Interview the user relentlessly about a plan, decision, or idea until every branch of the design tree is resolved.
-- **[writing-for-agents](skills/writing-for-agents/SKILL.md)**: Writing documents for agents: skills, CLAUDE.md, and any doc an agent reaches by a pointer.
+- **[writing-for-agents](skills/writing-for-agents/SKILL.md)**: Writing documents for agents: skills, CLAUDE.md/AGENTS.md, and any doc an agent reaches by a pointer.
 
 ## Credits
 
