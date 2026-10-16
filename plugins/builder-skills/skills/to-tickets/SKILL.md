@@ -64,7 +64,7 @@ Publish the approved tickets. **How** depends on the tracker `/setup-builder-ski
 
 Work the **frontier**: any ticket whose blockers are all done. For a purely linear chain that means top to bottom.
 
-Do NOT close any parent issue or edit its body. One exception: if the source was a spec carrying the `ready-for-agent` triage label (as `/to-spec` publishes it), remove that label once every ticket is published (on a local tracker, delete the spec's `Status:` line). The tickets are now the units agents pick up; the spec as a whole is built only by `/implement-spec`.
+Do NOT close or modify any parent issue, with one exception: if the source was a spec from `/to-spec`, remove its `ready-for-agent` triage label once the tickets are published (on a local tracker, clear its `Status:` line). The tickets are now the agent-grabbable work; the spec itself is built through them with `/implement-spec`, so leaving the label would let an agent grab the whole spec alongside them.
 
 <local-ticket-template>
 

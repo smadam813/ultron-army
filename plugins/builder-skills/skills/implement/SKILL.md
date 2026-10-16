@@ -1,14 +1,12 @@
 ---
 name: implement
-description: "Implement a single issue: one ticket, one agent-ready issue, or the work agreed in this conversation. A spec split into tickets goes to /implement-spec instead."
+description: "Implement a single issue or ticket, or work described in the conversation. For a whole spec split into tickets, use /implement-spec."
 disable-model-invocation: true
 ---
 
-Implement one issue: a ticket from `/to-tickets`, an issue `/triage` made agent-ready, or the work agreed in this conversation.
+Implement the issue or ticket the user passes, or the work described in the conversation. If the user passes a whole spec that has been split into tickets, point them at `/implement-spec` instead.
 
-If the user passes an issue reference, fetch it from the issue tracker and state its title before starting. If the reference is ambiguous, ask.
-
-A spec that has been split into tickets (it has child tickets, or `.scratch/<feature>/issues/` beside it on a local tracker) is not yours to build: stop and point the user to `/implement-spec` for the whole spec, or to `/implement` on one of its tickets.
+If the user passes a ticket reference, fetch it from the issue tracker and state its title before starting. If the reference is ambiguous, ask.
 
 Call the Skill tool with "tdd" where possible, at pre-agreed seams.
 

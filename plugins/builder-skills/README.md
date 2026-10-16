@@ -22,7 +22,7 @@ Not sure where to start? Run **[`/ask-builder`](skills/ask-builder/SKILL.md)**: 
 - **[setup-builder-skills](skills/setup-builder-skills/SKILL.md)**: Configure this repo for the engineering skills (issue tracker, triage labels, domain doc layout). Run once per repo.
 - **[to-spec](skills/to-spec/SKILL.md)**: Turn the current conversation into a spec and publish it to the issue tracker.
 - **[to-tickets](skills/to-tickets/SKILL.md)**: Break any plan, spec, or conversation into a set of tracer-bullet tickets, each declaring its blocking edges, whether as text in a local file or as native blocking links on a real tracker.
-- **[implement](skills/implement/SKILL.md)**: Build a single issue (one ticket, or one agent-ready issue), driving `/tdd` at pre-agreed seams, then committing and closing out with `/review-changes`.
+- **[implement](skills/implement/SKILL.md)**: Build a single issue or ticket (or work described in the conversation), driving `/tdd` at pre-agreed seams, then committing and closing out with `/review-changes`.
 - **[implement-spec](skills/implement-spec/SKILL.md)**: Implement a whole spec on one integration branch. Works the tickets as a task graph, running implementer subagents across the ready frontier for maximum concurrency, then closes out with `/review-changes`.
 - **[wayfinder](skills/wayfinder/SKILL.md)**: Plan a huge chunk of work (more than one agent session can hold) as a shared map of decision tickets on the issue tracker, resolved one at a time until the way to the destination is clear.
 - **[retro](skills/retro/SKILL.md)**: Suggest improvements to the coding agent's environment (navigation, automated checks, coding standards, steering files, tooling) after a session, most severe first.
