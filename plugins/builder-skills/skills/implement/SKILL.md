@@ -1,10 +1,10 @@
 ---
 name: implement
-description: "Implement one or more issues or tickets, or work described in the conversation. To implement a spec, use /implement-spec."
+description: "Implement one or more tickets, or work described in the conversation. To implement a spec, use /implement-spec."
 disable-model-invocation: true
 ---
 
-Implement the issues or tickets the user passes, or the work described in the conversation. If the user passes a spec, point them at `/implement-spec` instead.
+Implement the tickets the user passes, or the work described in the conversation. If the user passes a spec, point them at `/implement-spec` instead.
 
 If the user passes ticket references, fetch each from the issue tracker and state its title before starting. If the reference is ambiguous, ask.
 
