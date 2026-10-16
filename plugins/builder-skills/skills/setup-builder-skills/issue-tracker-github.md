@@ -11,6 +11,7 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 - **Comment on an issue**: `gh issue comment <number> --body "..."`
 - **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
 - **Close**: `gh issue close <number> --comment "..."`
+- **Specs**: a spec is an issue labelled `spec` (`gh issue create --label spec ...`). The label isn't a triage role; it keeps the spec out of `/triage` and away from agents looking for work.
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
 

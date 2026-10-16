@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
 
-The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/setup-builder-skills`.
+The issue tracker should have been provided to you. If not, tell the user to run `/setup-builder-skills`.
 
 ## Process
 
@@ -16,7 +16,7 @@ The issue tracker and triage label vocabulary should have been provided to you. 
 
 Check with the user that these seams match their expectations.
 
-3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage. If the spec is later split with `/to-tickets`, that skill removes the label so only the tickets stay grabbable.
+3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `spec` label (a local tracker marks the spec by its `spec.md` filename instead). It isn't a triage role: it marks the issue as a spec, so `/triage` leaves it alone and no agent grabs it as work. A spec is built through its tickets, with `/to-tickets` then `/implement-spec`.
 
 <spec-template>
 
